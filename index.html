@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zack. Hausmeister auf Abruf in Berlin</title>
+<meta name="description" content="Kleine Reparaturen und Montage in Berlin: Möbel aufbauen, Lampen anschließen, Regale aufhängen. Wir sprechen Deutsch und Russisch.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root {
+    --paper:#f4f1ea; --card:#fbf9f4; --raised:#ebe6dc;
+    --ink:#151412; --sec:#55504a; --mute:#736d66;
+    --line:rgba(21,20,18,.12); --line2:rgba(21,20,18,.2);
+    --acc:#ff5b14; --acc-h:#ff6f30;
+    --night:#151412; --night2:#1f1d1a; --nline:rgba(244,241,234,.12); --ntext:#f4f1ea; --nsec:#b3ada3;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --disp:'Unbounded',system-ui,sans-serif; --sans:'Onest',system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:400 16px/26px var(--sans); -webkit-font-smoothing:antialiased; }
+  a { color:inherit; }
+  .wrap { max-width:1280px; margin:0 auto; padding:0 32px; }
+  .num { font-variant-numeric:tabular-nums; }
+  svg.i { width:18px; height:18px; flex:none; }
+
+  /* шкала рулетки — фирменная деталь */
+  .ruler { height:24px; background:
+      repeating-linear-gradient(90deg, var(--ink) 0 1.5px, transparent 1.5px 80px) 0 0/100% 24px no-repeat,
+      repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 40px) 0 0/100% 14px no-repeat,
+      repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 8px) 0 0/100% 7px no-repeat;
+    opacity:.35; }
+  .night .ruler { background:
+      repeating-linear-gradient(90deg, var(--acc) 0 1.5px, transparent 1.5px 80px) 0 0/100% 24px no-repeat,
+      repeating-linear-gradient(90deg, var(--ntext) 0 1px, transparent 1px 40px) 0 0/100% 14px no-repeat,
+      repeating-linear-gradient(90deg, var(--ntext) 0 1px, transparent 1px 8px) 0 0/100% 7px no-repeat; opacity:.5; }
+
+  /* header */
+  header { position:sticky; top:0; z-index:10; background:var(--paper); border-bottom:1px solid var(--line); }
+  .nav { height:72px; display:flex; align-items:center; gap:32px; }
+  .logo { font:600 24px/1 var(--disp); letter-spacing:-.03em; text-decoration:none; }
+  .logo span { color:var(--acc); }
+  .links { display:flex; gap:28px; font-size:15px; color:var(--sec); }
+  .links a { text-decoration:none; transition:color .15s var(--ease); }
+  .links a:hover { color:var(--ink); }
+  .lang { margin-left:auto; display:flex; background:var(--raised); border-radius:8px; padding:3px; }
+  .lang button { height:30px; padding:0 10px; border:0; border-radius:6px; background:none; font:500 13px/1 var(--sans); color:var(--sec); cursor:pointer; transition:background-color .15s var(--ease), color .15s var(--ease); }
+  .lang button.on { background:var(--card); color:var(--ink); box-shadow:0 1px 2px rgba(21,20,18,.08); }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; height:48px; padding:0 22px; border-radius:10px; border:1px solid transparent; font:500 16px/1 var(--sans); cursor:pointer; text-decoration:none; white-space:nowrap; transition:background-color .15s var(--ease), border-color .15s var(--ease), transform .12s var(--ease); }
+  .btn:active { transform:scale(.98); }
+  .btn.pri { background:var(--acc); color:var(--ink); }
+  .btn.pri:hover { background:var(--acc-h); }
+  .btn.sec { border-color:var(--line2); color:var(--ink); background:transparent; }
+  .btn.sec:hover { background:var(--raised); }
+  .btn.sm { height:40px; padding:0 16px; font-size:15px; }
+
+  /* hero */
+  .hero { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr); gap:64px; align-items:center; padding-top:72px; padding-bottom:72px; }
+  .eyebrow { display:flex; align-items:center; gap:8px; color:var(--sec); font-size:15px; margin-bottom:24px; }
+  .live { width:8px; height:8px; border-radius:50%; background:#2f9e5b; box-shadow:0 0 0 3px rgba(47,158,91,.18); }
+  h1 { font:600 84px/0.98 var(--disp); letter-spacing:-.045em; margin:0; }
+  h1 em { font-style:normal; color:var(--acc); }
+  html[lang=ru] h1 { font-size:68px; letter-spacing:-.04em; }
+  .lead { font-size:20px; line-height:32px; color:var(--sec); max-width:34rem; margin:28px 0 36px; }
+  .cta { display:flex; gap:12px; flex-wrap:wrap; }
+  .langs-note { margin-top:28px; color:var(--mute); font-size:14px; display:flex; gap:8px; align-items:center; }
+
+  /* Stundenzettel — главный объект */
+  .ticket { position:relative; background:var(--card); border-radius:6px; padding:28px 28px 24px; transform:rotate(-2.5deg); box-shadow:0 1px 0 rgba(255,255,255,.7) inset, 0 24px 48px -20px rgba(21,20,18,.35), 0 2px 6px rgba(21,20,18,.08); }
+  .ticket::before { content:''; position:absolute; left:0; right:0; top:-6px; height:12px; background:radial-gradient(circle at 6px 6px, var(--paper) 4px, transparent 4.5px) 0 0/16px 12px repeat-x; }
+  .ticket .th { display:flex; justify-content:space-between; align-items:baseline; padding-bottom:16px; border-bottom:2px solid var(--ink); }
+  .ticket .th b { font:600 18px/1 var(--disp); letter-spacing:-.02em; }
+  .ticket .th span { color:var(--mute); font-size:13px; }
+  .ticket .row { display:flex; justify-content:space-between; gap:16px; padding:14px 0; border-bottom:1px dashed var(--line2); font-size:15px; }
+  .ticket .row span:first-child { color:var(--sec); }
+  .ticket .sum { display:flex; justify-content:space-between; align-items:baseline; padding-top:18px; }
+  .ticket .sum span { color:var(--sec); font-size:15px; }
+  .ticket .sum b { font:600 40px/1 var(--disp); letter-spacing:-.03em; }
+  .ticket .foot { margin-top:16px; color:var(--mute); font-size:13px; line-height:18px; }
+  .stamp { position:absolute; right:-28px; top:-44px; width:116px; height:116px; border-radius:50%; border:3px solid var(--acc); color:var(--acc); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; transform:rotate(14deg); font:600 15px/1.1 var(--disp); letter-spacing:-.02em; opacity:.92; background:rgba(251,249,244,.6); }
+  .stamp small { font:500 10px/1.2 var(--sans); letter-spacing:.02em; margin-top:4px; }
+
+  /* sections */
+  section { padding:112px 0; }
+  .sec-h { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,26rem); gap:32px; align-items:end; margin-bottom:48px; }
+  h2 { font:600 52px/1.02 var(--disp); letter-spacing:-.04em; margin:0; }
+  .sec-h p { color:var(--sec); margin:0; }
+
+  /* калькулятор услуг — второй главный элемент */
+  .night { background:var(--night); color:var(--ntext); }
+  .night h2 { color:var(--ntext); }
+  .night .sec-h p { color:var(--nsec); }
+  .calc { display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:24px; align-items:start; }
+  .tasks { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+  .task { display:grid; grid-template-columns:40px 1fr auto; align-items:center; gap:14px; min-height:76px; padding:12px 16px 12px 12px; border-radius:12px; border:1px solid var(--nline); background:var(--night2); color:var(--ntext); cursor:pointer; text-align:left; font:inherit; transition:border-color .15s var(--ease), background-color .15s var(--ease); }
+  .task:hover { border-color:rgba(244,241,234,.28); }
+  .task .ic { width:40px; height:40px; border-radius:8px; background:rgba(244,241,234,.06); display:flex; align-items:center; justify-content:center; color:var(--nsec); transition:background-color .15s var(--ease), color .15s var(--ease); }
+  .task .t { font-weight:500; line-height:20px; }
+  .task .d { color:var(--nsec); font-size:13px; line-height:18px; margin-top:2px; }
+  .task .p { font-size:14px; color:var(--nsec); white-space:nowrap; }
+  .task.on { border-color:var(--acc); background:#26201b; }
+  .task.on .ic { background:var(--acc); color:var(--ink); }
+  .task.on .p { color:var(--ntext); }
+  .total { position:sticky; top:96px; background:var(--card); color:var(--ink); border-radius:16px; padding:24px; }
+  .total .k { color:var(--sec); font-size:14px; }
+  .total .big { font:600 56px/1 var(--disp); letter-spacing:-.04em; margin:8px 0 4px; }
+  .total .lines { margin:20px 0; border-top:1px solid var(--line); }
+  .total .lines div { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--line); font-size:15px; }
+  .total .lines span:first-child { color:var(--sec); }
+  .total .btn { width:100%; }
+  .total .fine { color:var(--mute); font-size:13px; line-height:18px; margin-top:12px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; min-height:28px; }
+  .chips span { font-size:13px; line-height:18px; padding:4px 10px; border-radius:6px; background:var(--raised); color:var(--sec); }
+
+  /* почему мы */
+  .why { display:grid; grid-template-columns:repeat(4,1fr); border-top:2px solid var(--ink); }
+  .why > div { padding:28px 28px 0 0; }
+  .why > div + div { padding-left:28px; border-left:1px solid var(--line); }
+  .why b { display:block; font:600 22px/1.15 var(--disp); letter-spacing:-.03em; margin-bottom:12px; }
+  .why p { color:var(--sec); margin:0; font-size:15px; line-height:24px; }
+
+  /* как это работает */
+  .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .step { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px; }
+  .step .n { font:600 64px/1 var(--disp); letter-spacing:-.05em; color:var(--raised); -webkit-text-stroke:1.5px var(--ink); margin-bottom:32px; }
+  .step h3 { font:500 20px/26px var(--sans); margin:0 0 8px; }
+  .step p { color:var(--sec); margin:0; font-size:15px; line-height:24px; }
+
+  /* контакты */
+  .contact { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:48px; align-items:start; }
+  .quick { display:grid; gap:8px; margin-top:32px; }
+  .quick a { display:flex; align-items:center; gap:14px; padding:18px 20px; border-radius:12px; background:var(--night2); border:1px solid var(--nline); text-decoration:none; transition:border-color .15s var(--ease); }
+  .quick a:hover { border-color:var(--acc); }
+  .quick a b { font-weight:500; display:block; }
+  .quick a span { color:var(--nsec); font-size:14px; }
+  .quick a svg { color:var(--acc); }
+  .quick a .go { margin-left:auto; color:var(--nsec); }
+  form { background:var(--card); color:var(--ink); border-radius:16px; padding:32px; display:grid; gap:16px; }
+  label { display:grid; gap:6px; font-size:14px; color:var(--sec); }
+  input, textarea { height:48px; border-radius:10px; border:1px solid var(--line2); background:var(--paper); padding:0 14px; font:400 16px var(--sans); color:var(--ink); transition:border-color .15s var(--ease); }
+  textarea { height:auto; min-height:96px; padding:12px 14px; resize:vertical; }
+  input:focus, textarea:focus { outline:none; border-color:var(--ink); }
+  .fine { color:var(--mute); font-size:13px; line-height:18px; }
+  .fine a { color:var(--sec); }
+
+  footer { background:var(--night); color:var(--nsec); font-size:14px; padding:0 0 40px; }
+  footer .wrap { display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; padding-top:32px; }
+  footer nav { display:flex; gap:24px; }
+  footer a { text-decoration:none; color:var(--ntext); }
+  footer a:hover { color:var(--acc); }
+  :focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
+
+  main { overflow-x:clip; }
+  .reveal { animation:rise .6s var(--ease) both; }
+  .reveal.d2 { animation-delay:.12s; }
+  @keyframes rise { from { opacity:0; transform:translateY(10px); } }
+
+  @media (max-width:1080px) {
+    .links { display:none; }
+    .hero, .calc, .contact { grid-template-columns:1fr; }
+    .hero { gap:56px; }
+    .ticket { max-width:420px; }
+    h1, html[lang=ru] h1 { font-size:60px; }
+    .why { grid-template-columns:repeat(2,1fr); }
+    .why > div:nth-child(3) { border-left:0; padding-left:0; }
+    .total { position:static; }
+  }
+  @media (max-width:640px) {
+    .wrap { padding:0 20px; }
+    .nav { gap:12px; }
+    .nav .btn span { display:none; }
+    .nav .btn { width:40px; padding:0; }
+    .hero { padding-top:40px; padding-bottom:56px; }
+    h1, html[lang=ru] h1 { font-size:40px; letter-spacing:-.04em; }
+    .lead { font-size:17px; line-height:28px; }
+    .cta .btn { flex:1; }
+    .ticket { padding:24px 20px 20px; transform:rotate(-1.5deg); }
+    .ticket .sum b { font-size:32px; }
+    .stamp { width:92px; height:92px; right:-4px; top:-36px; font-size:12px; }
+    section { padding:72px 0; }
+    .sec-h { grid-template-columns:1fr; gap:16px; }
+    h2 { font-size:34px; }
+    .tasks { grid-template-columns:1fr; }
+    .why { grid-template-columns:1fr; }
+    .why > div, .why > div + div { padding:24px 0; border-left:0; border-bottom:1px solid var(--line); }
+    .steps { grid-template-columns:1fr; }
+    form { padding:24px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#">Zack<span>.</span></a>
+    <nav class="links">
+      <a href="#preise" data-i="nav1"></a>
+      <a href="#ablauf" data-i="nav2"></a>
+      <a href="#kontakt" data-i="nav3"></a>
+    </nav>
+    <div class="lang" role="group" aria-label="Sprache">
+      <button data-l="de">DE</button><button data-l="ru">RU</button>
+    </div>
+    <a class="btn pri sm" href="tel:+493000000000" aria-label="Anrufen"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span data-i="call"></span></a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div class="reveal">
+      <div class="eyebrow"><i class="live"></i><span data-i="eyebrow"></span></div>
+      <h1 data-i="h1" data-html></h1>
+      <p class="lead" data-i="lead"></p>
+      <div class="cta">
+        <a class="btn pri" href="#preise" data-i="cta1"></a>
+        <a class="btn sec" href="https://wa.me/493000000000" target="_blank" rel="noopener">
+          <svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>WhatsApp</a>
+      </div>
+      <div class="langs-note"><span data-i="langs"></span></div>
+    </div>
+    <div class="reveal d2">
+      <div class="ticket">
+        <div class="th"><b>Stundenzettel</b><span class="num">Nr. 0412</span></div>
+        <div class="row"><span data-i="t1"></span><b class="num" data-i="t1v"></b></div>
+        <div class="row"><span data-i="t2"></span><b class="num" data-i="t2v"></b></div>
+        <div class="row"><span data-i="t3"></span><b data-i="t3v"></b></div>
+        <div class="sum"><span data-i="t4"></span><b class="num" data-i="t4v"></b></div>
+        <div class="foot" data-i="tfoot"></div>
+        <div class="stamp"><span data-i="stamp"></span><small data-i="stamp2"></small></div>
+      </div>
+    </div>
+  </div>
+  <div class="wrap"><div class="ruler"></div></div>
+
+  <section id="preise" class="night">
+    <div class="wrap">
+      <div class="sec-h">
+        <h2 data-i="p_h"></h2>
+        <p data-i="p_p"></p>
+      </div>
+      <div class="calc">
+        <div class="tasks" id="tasks"></div>
+        <aside class="total">
+          <div class="k" data-i="sum_k"></div>
+          <div class="big num" id="sumBig"></div>
+          <div class="chips" id="chips"></div>
+          <div class="lines">
+            <div><span data-i="sum_time"></span><b class="num" id="sumTime"></b></div>
+            <div><span data-i="sum_work"></span><b class="num" id="sumWork"></b></div>
+            <div><span data-i="sum_drive"></span><b class="num">15 €</b></div>
+          </div>
+          <a class="btn pri" href="#kontakt" data-i="sum_cta"></a>
+          <div class="fine" data-i="sum_fine"></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-h">
+        <h2 data-i="w_h"></h2>
+        <p data-i="w_p"></p>
+      </div>
+      <div class="why">
+        <div><b data-i="w1"></b><p data-i="w1p"></p></div>
+        <div><b data-i="w2"></b><p data-i="w2p"></p></div>
+        <div><b data-i="w3"></b><p data-i="w3p"></p></div>
+        <div><b data-i="w4"></b><p data-i="w4p"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ablauf" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-h">
+        <h2 data-i="a_h"></h2>
+        <p data-i="a_p"></p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="n">1</div><h3 data-i="a1"></h3><p data-i="a1p"></p></div>
+        <div class="step"><div class="n">2</div><h3 data-i="a2"></h3><p data-i="a2p"></p></div>
+        <div class="step"><div class="n">3</div><h3 data-i="a3"></h3><p data-i="a3p"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="night"><div class="wrap"><div class="ruler"></div></div></div>
+  <section id="kontakt" class="night" style="padding-top:88px">
+    <div class="wrap contact">
+      <div>
+        <h2 data-i="k_h"></h2>
+        <p style="color:var(--nsec);margin:20px 0 0;max-width:30rem" data-i="k_p"></p>
+        <div class="quick">
+          <a href="tel:+493000000000"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg><div><b class="num">030 000 000 00</b><span data-i="q1"></span></div><svg class="i go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></a>
+          <a href="https://wa.me/493000000000" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><div><b>WhatsApp</b><span data-i="q2"></span></div><svg class="i go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></a>
+          <a href="https://t.me/" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg><div><b>Telegram</b><span data-i="q3"></span></div><svg class="i go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-7-7 7 7-7 7"/></svg></a>
+        </div>
+      </div>
+      <form id="form">
+        <label><span data-i="f1"></span><input required autocomplete="name"></label>
+        <label><span data-i="f2"></span><input required type="tel" autocomplete="tel" placeholder="+49"></label>
+        <label><span data-i="f3"></span><textarea id="fTask"></textarea></label>
+        <button class="btn pri" type="submit" data-i="f_btn"></button>
+        <div class="fine" data-i="f_fine" data-html></div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Zack. Hausmeister auf Abruf</span>
+    <nav><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></nav>
+    <span data-i="concept"></span>
+  </div>
+</footer>
+
+<script>
+const I = {
+  drill: '<path d="M14 9V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2Z"/><path d="M14 7h6"/><path d="M8 11v10h2"/>',
+  lamp: '<path d="M9 18h6M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>',
+  frame: '<rect width="18" height="14" x="3" y="7" rx="1"/><path d="m8 7 4-4 4 4"/>',
+  box: '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+  wash: '<rect width="16" height="20" x="4" y="2" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8 6h.01M11 6h2"/>',
+  door: '<path d="M13 4h3a2 2 0 0 1 2 2v14M2 20h3M13 20h9M10 12v.01"/><path d="M13 4.56v16.32a1 1 0 0 1-1.24.97L5 20V5.56a2 2 0 0 1 1.52-1.94l4-1A2 2 0 0 1 13 4.56Z"/>',
+  tap: '<path d="M12 2v4M4 10h16v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z"/><path d="M12 16v2M10 22h4"/>',
+  curtain: '<path d="M2 3h20M5 3v16M19 3v16M5 19c2-2 4-2 7 0s5 2 7 0"/>',
+};
+const TASKS = [
+  { id: 'moebel', ic: 'box', min: 120, de: ['Möbel aufbauen', 'Schrank, Bett, Kommode'], ru: ['Собрать мебель', 'Шкаф, кровать, комод'] },
+  { id: 'lampe', ic: 'lamp', min: 30, de: ['Lampe anschließen', 'Decken- und Wandleuchten'], ru: ['Подключить светильник', 'Потолочный или настенный'] },
+  { id: 'regal', ic: 'frame', min: 20, de: ['Regal oder Bilder aufhängen', 'Bohren, dübeln, ausrichten'], ru: ['Повесить полку или картины', 'Сверлим, крепим, ровняем'] },
+  { id: 'gardine', ic: 'curtain', min: 30, de: ['Gardinenstange montieren', 'Auch Rollos und Plissees'], ru: ['Повесить карниз', 'И рулонные шторы, плиссе'] },
+  { id: 'wasch', ic: 'wash', min: 40, de: ['Waschmaschine anschließen', 'Inkl. Transportsicherung'], ru: ['Подключить стиральную машину', 'И снять транспортные болты'] },
+  { id: 'tuer', ic: 'door', min: 20, de: ['Tür einstellen', 'Schleift, klemmt, schließt nicht'], ru: ['Отрегулировать дверь', 'Трёт, заедает, не закрывается'] },
+  { id: 'hahn', ic: 'tap', min: 40, de: ['Wasserhahn tauschen', 'Küche oder Bad'], ru: ['Заменить смеситель', 'На кухне или в ванной'] },
+  { id: 'bohr', ic: 'drill', min: 30, de: ['Kleinkram nach Liste', 'Alles, was liegen geblieben ist'], ru: ['Мелочи по списку', 'Всё, что давно откладывали'] },
+];
+const RATE = 45, DRIVE = 15;
+const T = {
+  de: {
+    nav1: 'Leistungen und Preise', nav2: 'Ablauf', nav3: 'Kontakt', call: 'Anrufen',
+    eyebrow: 'Berlin und Umgebung · Termine oft noch heute',
+    h1: 'Kleine Reparaturen.<br><em>Zack</em>, erledigt.',
+    lead: 'Möbel aufbauen, Lampen anschließen, Regale aufhängen. Ein Handwerker mit eigenem Werkzeug kommt zu Ihnen und macht alles an einem Termin.',
+    cta1: 'Preis berechnen', langs: 'Wir sprechen Deutsch und Russisch',
+    t1: 'Arbeitszeit, 1 Stunde', t1v: '45 €', t2: 'Anfahrt in Berlin', t2v: '15 €', t3: 'Material', t3v: 'nach Beleg',
+    t4: 'Ab', t4v: '60 €', tfoot: 'Danach in 30-Minuten-Schritten. Mit Rechnung, auch für Ihre Hausverwaltung.',
+    stamp: 'Erledigt', stamp2: 'am selben Tag',
+    p_h: 'Was ist zu tun?', p_p: 'Wählen Sie die Aufgaben aus und sehen Sie sofort, wie lange es dauert und was es ungefähr kostet.',
+    sum_k: 'Ungefähr', sum_time: 'Zeit', sum_work: 'Arbeit, 45 € pro Stunde', sum_drive: 'Anfahrt',
+    sum_cta: 'Termin anfragen', sum_fine: 'Unverbindliche Schätzung. Den Festpreis nennen wir nach einem Foto der Aufgabe.',
+    sum_none: 'Nichts ausgewählt', h: 'Std.',
+    w_h: 'Darum Zack.', w_p: 'Ein Ansprechpartner, klare Preise und keine Überraschungen auf der Rechnung.',
+    w1: 'Zwei Sprachen', w1p: 'Wir sprechen Deutsch und Russisch, auch am Telefon und im Chat.',
+    w2: 'Eigenes Werkzeug', w2p: 'Bohrmaschine, Leiter, Dübel und Kleinteile bringen wir mit.',
+    w3: 'Preis vorab', w3p: 'Schicken Sie ein Foto, und Sie bekommen den Preis, bevor wir losfahren.',
+    w4: 'Mit Rechnung', w4p: 'Ordentliche Rechnung für Sie, den Vermieter oder die Hausverwaltung.',
+    a_h: 'So läuft es ab', a_p: 'Vom ersten Foto bis zur fertigen Aufgabe meist in ein bis zwei Tagen.',
+    a1: 'Schreiben', a1p: 'Schicken Sie uns per WhatsApp oder Telegram ein Foto und ein paar Worte zur Aufgabe.',
+    a2: 'Termin', a2p: 'Wir nennen den Preis und einen Termin, oft noch heute oder morgen.',
+    a3: 'Erledigt', a3p: 'Wir machen alles an einem Besuch. Bezahlen Sie bar, mit Karte oder per Überweisung.',
+    k_h: 'Erzählen Sie, was zu tun ist', k_p: 'Am schnellsten geht es per WhatsApp mit einem Foto. Oder lassen Sie Ihre Nummer da, wir rufen zurück.',
+    q1: 'Mo bis Sa, 8 bis 20 Uhr', q2: 'Foto schicken, Preis bekommen', q3: 'Auf Deutsch oder Russisch',
+    f1: 'Name', f2: 'Telefon', f3: 'Was ist zu tun?', f_btn: 'Rückruf anfordern',
+    f_fine: 'Mit dem Absenden stimmen Sie der Verarbeitung Ihrer Daten gemäß <a href="datenschutz.html">Datenschutzerklärung</a> zu.',
+    f_done: 'Danke, wir rufen Sie zurück', f_done2: 'In der Regel innerhalb einer Stunde',
+    concept: 'Konzept. Name, Kontakte und Preise sind Beispiele',
+  },
+  ru: {
+    nav1: 'Услуги и цены', nav2: 'Как работаем', nav3: 'Контакты', call: 'Позвонить',
+    eyebrow: 'Берлин и пригород · часто приезжаем в тот же день',
+    h1: 'Мелкий ремонт.<br><em>Zack</em> — и готово.',
+    lead: 'Соберём мебель, подключим светильник, повесим полки. Мастер со своим инструментом приедет и сделает всё за один визит.',
+    cta1: 'Рассчитать цену', langs: 'Говорим по-русски и по-немецки',
+    t1: 'Работа, 1 час', t1v: '45 €', t2: 'Выезд по Берлину', t2v: '15 €', t3: 'Материалы', t3v: 'по чеку',
+    t4: 'От', t4v: '60 €', tfoot: 'Дальше шагами по 30 минут. С официальным счётом, в том числе для управляющей компании.',
+    stamp: 'Готово', stamp2: 'в тот же день',
+    p_h: 'Что нужно сделать?', p_p: 'Отметьте задачи и сразу увидите, сколько это займёт и сколько примерно стоит.',
+    sum_k: 'Примерно', sum_time: 'Время', sum_work: 'Работа, 45 € в час', sum_drive: 'Выезд',
+    sum_cta: 'Записаться', sum_fine: 'Это примерная оценка. Точную цену назовём по фото задачи.',
+    sum_none: 'Ничего не выбрано', h: 'ч',
+    w_h: 'Почему с нами просто', w_p: 'Один человек на связи, понятные цены и никаких сюрпризов в счёте.',
+    w1: 'Два языка', w1p: 'Говорим по-русски и по-немецки — по телефону и в мессенджерах.',
+    w2: 'Свой инструмент', w2p: 'Дрель, стремянку, дюбели и мелочёвку привозим с собой.',
+    w3: 'Цена заранее', w3p: 'Пришлите фото — назовём цену до того, как выедем.',
+    w4: 'Со счётом', w4p: 'Официальный счёт для вас, арендодателя или управляющей компании.',
+    a_h: 'Как это работает', a_p: 'От первого фото до готовой задачи обычно один-два дня.',
+    a1: 'Напишите', a1p: 'Пришлите в WhatsApp или Telegram фото и пару слов о задаче.',
+    a2: 'Договоримся', a2p: 'Назовём цену и время, часто на сегодня или завтра.',
+    a3: 'Готово', a3p: 'Сделаем всё за один визит. Оплата наличными, картой или переводом.',
+    k_h: 'Расскажите, что нужно сделать', k_p: 'Быстрее всего — фото в WhatsApp. Или оставьте номер, и мы перезвоним.',
+    q1: 'Пн–сб, с 8 до 20', q2: 'Пришлите фото — назовём цену', q3: 'По-русски или по-немецки',
+    f1: 'Имя', f2: 'Телефон', f3: 'Что нужно сделать?', f_btn: 'Жду звонка',
+    f_fine: 'Отправляя форму, вы соглашаетесь на обработку данных согласно <a href="datenschutz.html">политике конфиденциальности</a>.',
+    f_done: 'Спасибо, перезвоним', f_done2: 'Обычно в течение часа',
+    concept: 'Концепт. Название, контакты и цены условные',
+  },
+};
+let lang = localStorage.getItem('zack-lang') || (navigator.language || '').startsWith('ru') && 'ru' || 'de';
+const picked = new Set(['moebel', 'lampe', 'regal']);
+const eur = n => n.toLocaleString(lang === 'de' ? 'de-DE' : 'ru-RU') + ' €';
+const dur = m => m < 60 ? m + (lang === "de" ? " Min." : " мин") : hrs(m);
+const hrs = m => (m / 60).toLocaleString(lang === 'de' ? 'de-DE' : 'ru-RU', { maximumFractionDigits: 1 }) + ' ' + T[lang].h;
+
+function render() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const v = T[lang][el.dataset.i]; if (v == null) return;
+    el.hasAttribute('data-html') ? el.innerHTML = v : el.textContent = v;
+  });
+  document.querySelectorAll('.lang button').forEach(b => b.classList.toggle('on', b.dataset.l === lang));
+  document.getElementById('tasks').innerHTML = TASKS.map(t => `<button type="button" class="task ${picked.has(t.id) ? 'on' : ''}" aria-pressed="${picked.has(t.id)}" onclick="toggle('${t.id}')">
+    <span class="ic"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${I[t.ic]}</svg></span>
+    <span><div class="t">${t[lang][0]}</div><div class="d">${t[lang][1]}</div></span>
+    <span class="p num">≈ ${dur(t.min)}</span></button>`).join('');
+  const sel = TASKS.filter(t => picked.has(t.id));
+  const raw = sel.reduce((a, t) => a + t.min, 0);
+  const min = sel.length ? Math.max(60, Math.ceil(raw / 30) * 30) : 0;
+  const work = min / 60 * RATE;
+  document.getElementById('sumBig').textContent = sel.length ? eur(Math.round(work + DRIVE)) : '—';
+  document.getElementById('sumTime').textContent = sel.length ? hrs(min) : '—';
+  document.getElementById('sumWork').textContent = sel.length ? eur(Math.round(work)) : '—';
+  document.getElementById('chips').innerHTML = sel.length ? sel.map(t => `<span>${t[lang][0]}</span>`).join('') : `<span>${T[lang].sum_none}</span>`;
+  document.getElementById('fTask').placeholder = sel.map(t => t[lang][0]).join(', ');
+}
+function toggle(id) { picked.has(id) ? picked.delete(id) : picked.add(id); render(); }
+document.querySelectorAll('.lang button').forEach(b => b.onclick = () => { lang = b.dataset.l; localStorage.setItem('zack-lang', lang); render(); });
+document.getElementById('form').onsubmit = e => {
+  e.preventDefault();
+  e.target.innerHTML = `<h3 style="font:600 28px/1.1 var(--disp);letter-spacing:-.03em;margin:0">${T[lang].f_done}</h3><p style="color:var(--sec);margin:0">${T[lang].f_done2}</p>`;
+};
+render();
+</script>
+</body>
+</html>
